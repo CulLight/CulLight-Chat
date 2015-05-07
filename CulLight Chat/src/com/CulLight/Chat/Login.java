@@ -1,19 +1,97 @@
 package com.CulLight.Chat;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class Login extends JFrame {
-
+	private static final long serialVersionUID = 1L;
+	
+	//global variables
 	private JPanel contentPane;
+	private JTextField txtName;
+	private JTextField txtAddress;
+	private JLabel lblAddress;
+	private JLabel lblPort;
+	private JTextField txtPort;
+	private JLabel lblAddressDesc;
+	private JLabel lblPortDesc;
 
-	/**
-	 * Launch the application.
-	 */
+	public Login() {
+		//get native windows look of GUI, somehow doesnt work
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+			
+		setResizable(false);
+		setTitle("Login");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(300, 380);
+		//start window in center
+		setLocationRelativeTo(null);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		//absolute Layout, because not resizable GUI
+		contentPane.setLayout(null);
+		
+		txtName = new JTextField();
+		txtName.setBounds(64, 50, 165, 28);
+		contentPane.add(txtName);
+		txtName.setColumns(10);
+		
+		JLabel lblName = new JLabel("Name:");
+		lblName.setBounds(129, 34, 46, 16);
+		contentPane.add(lblName);
+		
+		txtAddress = new JTextField();
+		txtAddress.setBounds(64, 117, 165, 28);
+		contentPane.add(txtAddress);
+		txtAddress.setColumns(10);
+		
+		lblAddress = new JLabel("IP Address:");
+		lblAddress.setBounds(119, 100, 71, 16);
+		contentPane.add(lblAddress);
+		
+		lblPort = new JLabel("Port:");
+		lblPort.setBounds(135, 181, 40, 16);
+		contentPane.add(lblPort);
+		
+		txtPort = new JTextField();
+		txtPort.setColumns(10);
+		txtPort.setBounds(64, 198, 165, 28);
+		contentPane.add(txtPort);
+		
+		lblAddressDesc = new JLabel("(eg. 192.169.0.2)");
+		lblAddressDesc.setBounds(103, 146, 99, 16);
+		contentPane.add(lblAddressDesc);
+		
+		lblPortDesc = new JLabel("(eg. 8192)");
+		lblPortDesc.setBounds(121, 230, 69, 16);
+		contentPane.add(lblPortDesc);
+		
+		JButton btnLogin = new JButton("Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		btnLogin.setBounds(102, 294, 89, 23);
+		contentPane.add(btnLogin);
+	}
+
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -26,17 +104,4 @@ public class Login extends JFrame {
 			}
 		});
 	}
-
-	/**
-	 * Create the frame.
-	 */
-	public Login() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
-	}
-
 }
