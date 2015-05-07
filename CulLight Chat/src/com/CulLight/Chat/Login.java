@@ -21,9 +21,9 @@ public class Login extends JFrame {
 	private JPanel contentPane;
 	private JTextField txtName;
 	private JTextField txtAddress;
+	private JTextField txtPort;
 	private JLabel lblAddress;
 	private JLabel lblPort;
-	private JTextField txtPort;
 	private JLabel lblAddressDesc;
 	private JLabel lblPortDesc;
 
@@ -84,14 +84,31 @@ public class Login extends JFrame {
 		contentPane.add(lblPortDesc);
 		
 		JButton btnLogin = new JButton("Login");
+		//anonymous inner type (addActionListener wants a class of type ActionListner that has function actionPerformed
+		//instead of having a new class, one can do this anoymous, with its actionPerfomed function here
 		btnLogin.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
+				String name = txtName.getText();
+				String address = txtAddress.getText();
+				int port = Integer.parseInt(txtPort.getText());
+				login(name, address, port);
 			}
+
 		});
 		btnLogin.setBounds(102, 294, 89, 23);
 		contentPane.add(btnLogin);
 	}
 
+	
+	
+	private void login(String name, String address, int port) {
+		// close the login window
+		dispose();
+		System.out.println("name:    " + name +"\naddress: " + address +"\nport:    " + port );
+	}
+	
+	
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
