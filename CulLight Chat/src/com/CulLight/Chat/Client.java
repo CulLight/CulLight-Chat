@@ -24,6 +24,7 @@ public class Client extends JFrame {
 	private String name, address;
 	private int port;
 	private JTextField txtMessage;
+	private JTextArea txtrHistory;
 	
 	public Client(String name, String address, int port) {
 		this.name = name;
@@ -32,7 +33,7 @@ public class Client extends JFrame {
 		//unconventional to call function from constructor, but 
 		// createWindow is private, so one cant overwrite it.
 		createWindow();
-
+		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
 	}
 	
 	private void createWindow() {
@@ -58,7 +59,7 @@ public class Client extends JFrame {
 		//set layout of the frame to the set layout above
 		contentPane.setLayout(gbl_contentPane);
 		
-		JTextArea txtrHistory = new JTextArea();
+		txtrHistory = new JTextArea();
 		txtrHistory.setEditable(false);
 		GridBagConstraints gbc_txtrHistory = new GridBagConstraints();
 		gbc_txtrHistory.insets = new Insets(0, 0, 5, 5);
@@ -88,6 +89,14 @@ public class Client extends JFrame {
 		contentPane.add(btnSend, gbc_btnSend);
 		
 		setVisible(true);
+		
+		// User should be able to type in message right away
+		txtMessage.requestFocusInWindow();
+		//
+	}
+	
+	public void console(String message) {
+		txtrHistory.append(message + "\n\r");
 	}
 
 }
