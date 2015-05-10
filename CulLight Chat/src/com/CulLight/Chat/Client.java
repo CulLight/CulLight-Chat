@@ -1,24 +1,22 @@
 package com.CulLight.Chat;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
-
-import java.awt.GridBagLayout;
-
-import javax.swing.JTextArea;
-
 import java.awt.GridBagConstraints;
-import javax.swing.JButton;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
-import javax.swing.JTextField;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 
 public class Client extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -28,7 +26,8 @@ public class Client extends JFrame {
 	private String name, address;
 	private int port;
 	private JTextField txtMessage;
-	private JTextArea txtrHistory;
+	private JTextArea history;
+	private DefaultCaret caret;
 	
 	public Client(String name, String address, int port) {
 		this.name = name;
@@ -63,18 +62,23 @@ public class Client extends JFrame {
 		//set layout of the frame to the set layout above
 		contentPane.setLayout(gbl_contentPane);
 		
-		txtrHistory = new JTextArea();
-		txtrHistory.setEditable(false);
-		GridBagConstraints gbc_txtrHistory = new GridBagConstraints();
-		gbc_txtrHistory.insets = new Insets(0, 0, 5, 5);
-		gbc_txtrHistory.fill = GridBagConstraints.BOTH;
+		history = new JTextArea();
+		history.setEditable(false);
+		// Put JTextArea history into ScrollPane
+		JScrollPane scroll = new JScrollPane(history);
+		//Scroll bar should also go to last entered line
+		caret = (DefaultCaret) history.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		GridBagConstraints scrollConstraints = new GridBagConstraints();
+		scrollConstraints.insets = new Insets(0, 0, 5, 5);
+		scrollConstraints.fill = GridBagConstraints.BOTH;
 		// which grid it is in
-		gbc_txtrHistory.gridx = 1;
-		gbc_txtrHistory.gridy = 1;
+		scrollConstraints.gridx = 1;
+		scrollConstraints.gridy = 1;
 		// grid cells it takes up
-		gbc_txtrHistory.gridwidth = 2;
-		gbc_txtrHistory.insets = new Insets(20, 0, 0, 0);
-		contentPane.add(txtrHistory, gbc_txtrHistory);
+		scrollConstraints.gridwidth = 2;
+		scrollConstraints.insets = new Insets(20, 0, 0, 0);
+		contentPane.add(scroll, scrollConstraints);
 		
 		txtMessage = new JTextField();
 		txtMessage.addKeyListener(new KeyAdapter() {
@@ -119,7 +123,7 @@ public class Client extends JFrame {
 	}
 	
 	public void console(String message) {
-		txtrHistory.append(message + "\n\r");
+		history.append(message + "\n\r");
 	}
 
 }
