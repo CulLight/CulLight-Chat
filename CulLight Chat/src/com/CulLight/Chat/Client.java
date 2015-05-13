@@ -7,6 +7,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -29,14 +33,44 @@ public class Client extends JFrame {
 	private JTextArea history;
 	private DefaultCaret caret;
 	
+	//socket = power outlet --> need to connect to it, to connect to the network
+	//two main protocolls: 1) TCP: guarantees delivery of packet and sequential package, can sent package to any (not connected) IP address
+	//                     resends package that has not arrived --> bad for gaming because one can get delayed
+	//	   				   2) UTP: needs to establish connection with address first before sending package
+	// use UTP
+	private DatagramSocket socket;
+	private InetAddress ip;
+	
 	public Client(String name, String address, int port) {
 		this.name = name;
 		this.address = address;
 		this.port = port;
+		Boolean connect = openConnection(address,port);
+		if (!connect) {
+			System.err.println("Connection failed");
+			console("Connection failed");
+		}
 		//unconventional to call function from constructor, but 
 		// createWindow is private, so one cant overwrite it.
 		createWindow();
 		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
+	}
+	
+	private boolean openConnection(String address, int port) {
+		// need to connect address (ip) which is a string into a string (inetAddress) object
+			try {
+				socket = new DatagramSocket();
+			} catch (SocketException e) {
+				e.printStackTrace();
+				return false;
+			}
+			try {
+				ip = InetAddress.getByName(address);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				return false;
+			}
+			return true;
 	}
 	
 	private void createWindow() {
@@ -73,10 +107,11 @@ public class Client extends JFrame {
 		scrollConstraints.insets = new Insets(0, 0, 5, 5);
 		scrollConstraints.fill = GridBagConstraints.BOTH;
 		// which grid it is in
-		scrollConstraints.gridx = 1;
-		scrollConstraints.gridy = 1;
+		scrollConstraints.gridx = 0;
+		scrollConstraints.gridy = 0;
 		// grid cells it takes up
-		scrollConstraints.gridwidth = 2;
+		scrollConstraints.gridwidth = 3;
+		scrollConstraints.gridheight = 2;
 		scrollConstraints.insets = new Insets(20, 0, 0, 0);
 		contentPane.add(scroll, scrollConstraints);
 		
@@ -91,8 +126,9 @@ public class Client extends JFrame {
 		GridBagConstraints gbc_txtMessage = new GridBagConstraints();
 		gbc_txtMessage.insets = new Insets(0, 0, 0, 5);
 		gbc_txtMessage.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtMessage.gridx = 1;
+		gbc_txtMessage.gridx = 0;
 		gbc_txtMessage.gridy = 2;
+		gbc_txtMessage.gridwidth = 2;
 		contentPane.add(txtMessage, gbc_txtMessage);
 		txtMessage.setColumns(10);
 		
