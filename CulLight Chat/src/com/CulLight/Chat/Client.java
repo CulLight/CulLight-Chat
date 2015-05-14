@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -55,11 +57,11 @@ public class Client extends JFrame {
 		createWindow();
 		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
 	}
-	
+		
 	private boolean openConnection(String address, int port) {
 		// need to connect address (ip) which is a string into a string (inetAddress) object
 			try {
-				socket = new DatagramSocket();
+				socket = new DatagramSocket(port);
 			} catch (SocketException e) {
 				e.printStackTrace();
 				return false;
@@ -71,6 +73,22 @@ public class Client extends JFrame {
 				return false;
 			}
 			return true;
+	}
+	
+	private String receive() {
+		//dont want to send package with size larger than kb
+		byte[] data = new byte[1024];
+		DatagramPacket packet = new DatagramPacket(data, data.length);
+		
+		//put data into packet
+		try {
+			//socket will sit until it receives sth --> will freeze application
+			// need for threads
+			socket.receive(packet);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String message = new String(packet.getData());
 	}
 	
 	private void createWindow() {
