@@ -76,6 +76,12 @@ public class Server implements Runnable{
 		receive.start();		
 	}
 	
+	private void send(String message, InetAddress address, int port) {
+		//signal end of message
+		message += "/e/";
+		send(message.getBytes(), address, port);
+	}
+	
 	//In contrast to send message of client which automatically sends to server
 	//it is connected to, the send method of the server needs an address, where to send the message to.
 	// final parameter because we send them over to an inner class
@@ -98,7 +104,7 @@ public class Server implements Runnable{
 	private void sendToAll(String message) {
 		for (int i = 0; i < clients.size(); i++) {
 			ServerClient client = clients.get(i);
-			send(message.getBytes(), client.address, client.port);
+			send(message, client.address, client.port);
 		}
 	}
 	
@@ -113,7 +119,7 @@ public class Server implements Runnable{
 			clients.add(new ServerClient(string.substring(3, string.length()), packet.getAddress(), packet.getPort(), id) );
 			System.out.println(string.substring(3, string.length()));
 			String ID = "/c/" + id;
-			send(ID.getBytes(), packet.getAddress(), packet.getPort());
+			send(ID, packet.getAddress(), packet.getPort());
 		} else if (string.startsWith("/m/")) {
 			sendToAll(string);
 		}else {
