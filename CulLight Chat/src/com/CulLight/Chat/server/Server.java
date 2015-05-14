@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 //code to send and receive data
 public class Server implements Runnable{
@@ -80,7 +81,11 @@ public class Server implements Runnable{
 	private void process(DatagramPacket packet) {
 		String string  = new String(packet.getData());
 		if (string.startsWith("/c/")) {
-			clients.add(new ServerClient(string.substring(3, string.length()), packet.getAddress(), packet.getPort(), 50) );
+			//Guaranteed universal unique number
+			//UUID id = UUID.randomUUID();
+			int id = UniqueIdentifier.getIdentifier();	
+			System.out.println("Identifier: " + id);
+			clients.add(new ServerClient(string.substring(3, string.length()), packet.getAddress(), packet.getPort(), id) );
 			System.out.println(string.substring(3, string.length()));
 		} else {
 			System.out.println(string);

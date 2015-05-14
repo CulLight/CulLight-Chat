@@ -13,6 +13,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Login extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -71,6 +73,16 @@ public class Login extends JFrame {
 		contentPane.add(lblPort);
 		
 		txtPort = new JTextField();
+		txtPort.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					String name = txtName.getText();
+					String address = txtAddress.getText();
+					int port = Integer.parseInt(txtPort.getText());
+					login(name, address, port);
+				}
+			}
+		});
 		txtPort.setColumns(10);
 		txtPort.setBounds(64, 198, 165, 28);
 		contentPane.add(txtPort);
