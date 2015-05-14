@@ -18,7 +18,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
-public class ClientWindow extends JFrame{
+public class ClientWindow extends JFrame implements Runnable{
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
@@ -26,8 +26,11 @@ public class ClientWindow extends JFrame{
 	private JTextArea history;
 	private DefaultCaret caret;
 	
+	private Thread run, listen;
+	private boolean running;
+	
 	private Client client;
-
+	
 	public ClientWindow(String name, String address, int port) {
 		client = new Client(name, address, port);
 		Boolean connect = client.openConnection(address);
@@ -41,6 +44,9 @@ public class ClientWindow extends JFrame{
 		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
 		String connection = "/c/" + name;
 		client.send(connection.getBytes());
+		running = true;
+		run = new Thread(this, "Running");
+		run.start();
 	}
 	
 	
@@ -122,6 +128,28 @@ public class ClientWindow extends JFrame{
 		//
 	}
 	
+	public void run() {
+		listen();
+		
+	}
+	
+	// need thread to not wait for receive forever
+	public void listen() {
+		listen = new Thread("Listen") {
+			public void run() {
+				while (running) {
+					String message = client.receive();
+					if (message.startsWith("/c/")) {
+						//client.setID(Integer.parseInt(message.substring(3, message.length())));
+						client.setID(Integer.parseInt(message.split("/c/")[1]));
+						console("Successfully connected to server! ID: " + client.getID());
+					}
+				}
+			}
+		};
+		listen.start();
+	}	
+	
 	private void send(String message){
 		if (message.equals("")) return;
 		message = client.getName() + ": " + message;
@@ -135,4 +163,5 @@ public class ClientWindow extends JFrame{
 	public void console(String message) {
 		history.append(message + "\n\r");
 	}
+
 }

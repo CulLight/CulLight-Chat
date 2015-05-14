@@ -1,12 +1,5 @@
 package com.CulLight.Chat;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -14,17 +7,9 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
-import javax.swing.text.DefaultCaret;
 
 public class Client {
+	// only send message will ever really communicate with server. "OpenConnection" does not
 
 	//socket = power outlet --> need to connect to it, to connect to the network
 	//two main protocolls: 1) TCP: guarantees delivery of packet and sequential package, can sent package to any (not connected) IP address
@@ -37,6 +22,8 @@ public class Client {
 	private int port;
 	
 	private Thread send;
+	
+	private int ID = -1;
 	
 	public Client(String name, String address, int port) {
 		this.name = name;
@@ -63,6 +50,7 @@ public class Client {
 				// socket = new DatagramSocket(port);
 				// now we will bind to any port that is available
 				// however this way server needs to know the port we are sending from
+				// UDP protocoll: we dont have to connect to serverto begin with
 				socket = new DatagramSocket();
 			} catch (SocketException e) {
 				e.printStackTrace();
@@ -109,7 +97,16 @@ public class Client {
 			e.printStackTrace();
 		}
 		String message = new String(packet.getData());
+
 		return message;
+	}
+	
+	public void setID(int id) {
+		this.ID = id;
+	}
+	
+	public int getID() {
+		return ID;
 	}
 
 }
