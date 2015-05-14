@@ -202,6 +202,8 @@ public class Client extends JFrame {
 		if (message.equals("")) return;
 		message = name + ": " + message;
 		console(message);
+		//prefix /m/ to indicate it is a message
+		message = "/m/" + message;
 		send(message.getBytes());
 		txtMessage.setText("");
 	}
