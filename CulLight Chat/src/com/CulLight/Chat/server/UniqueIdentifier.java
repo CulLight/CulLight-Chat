@@ -6,6 +6,10 @@ import java.util.List;
 
 public class UniqueIdentifier {
 	
+	//this class should have only one instance (singelton)
+	//easiest way is to have a private constructor and a static method to access the class
+	private UniqueIdentifier() {}
+	
 	private static List<Integer> ids = new ArrayList<Integer>();
 	//number of unique identifier
 	private static final int RANGE = 10000;
@@ -21,10 +25,7 @@ public class UniqueIdentifier {
 		//shuffle array
 		Collections.shuffle(ids);
 	}
-	private UniqueIdentifier() {
 		
-	}
-	
 	public static int getIdentifier() {
 		if (index > ids.size() - 1) index = 0;
 		return ids.get(index++);
