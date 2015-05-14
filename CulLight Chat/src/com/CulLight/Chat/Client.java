@@ -97,7 +97,6 @@ public class Client {
 			e.printStackTrace();
 		}
 		String message = new String(packet.getData());
-
 		return message;
 	}
 	
