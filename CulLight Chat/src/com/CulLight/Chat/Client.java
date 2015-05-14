@@ -49,7 +49,7 @@ public class Client extends JFrame {
 		this.name = name;
 		this.address = address;
 		this.port = port;
-		Boolean connect = openConnection(address,port);
+		Boolean connect = openConnection(address);
 		if (!connect) {
 			System.err.println("Connection failed");
 			console("Connection failed");
@@ -58,12 +58,18 @@ public class Client extends JFrame {
 		// createWindow is private, so one cant overwrite it.
 		createWindow();
 		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
+		String connection = name + " connected from " + address + ":" + port;
+		send(connection.getBytes());
 	}
 		
-	private boolean openConnection(String address, int port) {
+	private boolean openConnection(String address) {
 		// need to connect address (ip) which is a string into a string (inetAddress) object
 			try {
-				socket = new DatagramSocket(port);
+				// the following line wont work because server already occupies that port
+				// socket = new DatagramSocket(port);
+				// now we will bind to any port that is available
+				// however this way server needs to know the port we are sending from
+				socket = new DatagramSocket();
 			} catch (SocketException e) {
 				e.printStackTrace();
 				return false;
@@ -79,6 +85,7 @@ public class Client extends JFrame {
 	
 	private void send(final byte[] data) {  //need final because run is anonymous inner class
 		send = new Thread("Send") {
+			// anaonymous class prevents us from making new class that implemtents Runnable
 			public void run(){
 				DatagramPacket packet = new DatagramPacket(data,data.length, ip, port);
 				try {
@@ -108,6 +115,7 @@ public class Client extends JFrame {
 			e.printStackTrace();
 		}
 		String message = new String(packet.getData());
+		return message;
 	}
 	
 	private void createWindow() {
@@ -192,6 +200,7 @@ public class Client extends JFrame {
 		if (message.equals("")) return;
 		message = name + ": " + message;
 		console(message);
+		send(message.getBytes());
 		txtMessage.setText("");
 	}
 	
