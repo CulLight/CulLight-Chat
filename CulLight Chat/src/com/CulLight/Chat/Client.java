@@ -43,6 +43,8 @@ public class Client extends JFrame {
 	private DatagramSocket socket;
 	private InetAddress ip;
 	
+	private Thread send;
+	
 	public Client(String name, String address, int port) {
 		this.name = name;
 		this.address = address;
@@ -75,6 +77,22 @@ public class Client extends JFrame {
 			return true;
 	}
 	
+	private void send(final byte[] data) {  //need final because run is anonymous inner class
+		send = new Thread("Send") {
+			public void run(){
+				DatagramPacket packet = new DatagramPacket(data,data.length, ip, port);
+				try {
+					socket.send(packet);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+		};
+		send.start();
+		
+	}
+	
 	private String receive() {
 		//dont want to send package with size larger than kb
 		byte[] data = new byte[1024];
@@ -82,6 +100,7 @@ public class Client extends JFrame {
 		
 		//put data into packet
 		try {
+			// receive data that is send to socket, which knows the port
 			//socket will sit until it receives sth --> will freeze application
 			// need for threads
 			socket.receive(packet);
