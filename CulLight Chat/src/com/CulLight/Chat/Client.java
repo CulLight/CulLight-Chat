@@ -27,14 +27,7 @@ import javax.swing.text.DefaultCaret;
 public class Client extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
-	private JPanel contentPane;
 
-	private String name, address;
-	private int port;
-	private JTextField txtMessage;
-	private JTextArea history;
-	private DefaultCaret caret;
-	
 	//socket = power outlet --> need to connect to it, to connect to the network
 	//two main protocolls: 1) TCP: guarantees delivery of packet and sequential package, can sent package to any (not connected) IP address
 	//                     resends package that has not arrived --> bad for gaming because one can get delayed
@@ -42,8 +35,17 @@ public class Client extends JFrame {
 	// use UTP
 	private DatagramSocket socket;
 	private InetAddress ip;
+	private String name, address;
+	private int port;
 	
 	private Thread send;
+	
+	private JPanel contentPane;
+	private JTextField txtMessage;
+	private JTextArea history;
+	private DefaultCaret caret;
+	
+
 	
 	public Client(String name, String address, int port) {
 		this.name = name;
