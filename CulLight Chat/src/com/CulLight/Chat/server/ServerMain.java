@@ -31,12 +31,14 @@ public class ServerMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		String myIp = address.getHostAddress();
+		String myIp = "Your forward to ip is " + address.getHostAddress();
 		System.out.println(myIp); 
-		System.out.println("TO DO:");
-		System.out.println("Look up the IP of your router (google, what is my IP)");
-		System.out.println("Look up your PvP4 ip (cmd, ipconfig)");
-		System.out.println("Forward your port to your ip (router, config)");
+		System.out.println("TO DO for internet chat:");
+		System.out.println("--- Look up the IP of your router (google, what is my IP)");
+		System.out.println("--- Look up your PvP4 ip (cmd, ipconfig)");
+		System.out.println("--- Forward your port to your ip (router, config)");
+		System.out.println();
+		System.out.println();
 
 
 	}

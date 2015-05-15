@@ -121,9 +121,7 @@ public class Server implements Runnable{
 		} else if (string.startsWith("/m/")) {
 			sendToAll(string);
 		}else if (string.startsWith("/d/")) {
-			System.out.println(string);
 			String id = string.split("/d/|/e/")[1];
-			System.out.println(id);
 			disconnect(Integer.parseInt(id), true);
 		} else {
 			System.out.println(string);
