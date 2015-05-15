@@ -1,5 +1,8 @@
 package com.CulLight.Chat.server;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 //launch new instance of Server.class and allow it to run
 // can run multiple instances of Server.class
 public class ServerMain {
@@ -20,5 +23,21 @@ public class ServerMain {
 		}
 		port = Integer.parseInt(args[0]);
 		new ServerMain(port);
+		
+		InetAddress address = null;
+		try {
+			address = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String myIp = address.getHostAddress();
+		System.out.println(myIp); 
+		System.out.println("TO DO:");
+		System.out.println("Look up the IP of your router (google, what is my IP)");
+		System.out.println("Look up your PvP4 ip (cmd, ipconfig)");
+		System.out.println("Forward your port to your ip (router, config)");
+
+
 	}
 }

@@ -79,7 +79,6 @@ public class Client {
 			
 		};
 		send.start();
-		
 	}
 	
 	public String receive() {
@@ -99,7 +98,18 @@ public class Client {
 		String message = new String(packet.getData());
 		return message;
 	}
-	
+
+	public void close() {
+		new Thread() {
+			public void run(){
+				//dont terminate when it is used
+				synchronized (socket) {
+					socket.close();
+				}
+			}
+		}.start();
+	}
+
 	public void setID(int id) {
 		this.ID = id;
 	}

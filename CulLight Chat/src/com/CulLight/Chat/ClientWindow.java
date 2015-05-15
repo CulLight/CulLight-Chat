@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -42,7 +44,7 @@ public class ClientWindow extends JFrame implements Runnable{
 		// createWindow is private, so one cant overwrite it.
 		createWindow();
 		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
-		String connection = "/c/" + name;
+		String connection = "/c/" + name + "/e/";
 		client.send(connection.getBytes());
 		running = true;
 		run = new Thread(this, "Running");
@@ -96,7 +98,7 @@ public class ClientWindow extends JFrame implements Runnable{
 		txtMessage.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					send(txtMessage.getText());
+					send(txtMessage.getText(), true);
 				}
 			}
 		});
@@ -112,7 +114,7 @@ public class ClientWindow extends JFrame implements Runnable{
 		JButton btnSend = new JButton("Send");
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				send(txtMessage.getText());
+				send(txtMessage.getText(), true);
 			}
 		});
 		GridBagConstraints gbc_btnSend = new GridBagConstraints();
@@ -120,6 +122,15 @@ public class ClientWindow extends JFrame implements Runnable{
 		gbc_btnSend.gridx = 2;
 		gbc_btnSend.gridy = 2;
 		contentPane.add(btnSend, gbc_btnSend);
+		
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				String disconnect = "/d/" + client.getID() + "/e/";
+				send(disconnect, false);
+				running = false;
+				client.close();
+			}
+		});
 		
 		setVisible(true);
 		
@@ -155,17 +166,20 @@ public class ClientWindow extends JFrame implements Runnable{
 		listen.start();
 	}	
 	
-	private void send(String message){
+	private void send(String message, boolean text){
 		if (message.equals("")) return;
-		message = client.getName() + ": " + message;
-		//prefix /m/ to indicate it is a message
-		message = "/m/" + message;
+		if (text) {
+			message = client.getName() + ": " + message;
+			//prefix /m/ to indicate it is a message
+			message = "/m/" + message + "/e/";
+		}
 		client.send(message.getBytes());
 		txtMessage.setText("");
 	}
 	
 	public void console(String message) {
 		history.append(message + "\n\r");
+		history.setCaretPosition(history.getDocument().getLength());
 	}
 
 }
