@@ -114,7 +114,9 @@ public class Server implements Runnable{
 			//UUID id = UUID.randomUUID();
 			int id = UniqueIdentifier.getIdentifier();	
 			String name = string.split("/c/|/e/")[1];
-			System.out.println(name + "(" + id + ") connected!");
+			String text = name + "(" + id + ")"  + " @ " +  packet.getAddress().toString() + ":" + packet.getPort() + " connected.";
+			System.out.println(text);
+			//System.out.println(name + "(" + id + ") connected!");			
 			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
 			String ID = "/c/" + id;
 			send(ID, packet.getAddress(), packet.getPort());

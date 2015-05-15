@@ -7,13 +7,13 @@ import java.net.UnknownHostException;
 // can run multiple instances of Server.class
 public class ServerMain {
 		
-	private int port;
-	private Server server;
-	
-	public ServerMain(int port) {
-		this.port = port;
-		server = new Server(port);
-	}
+//	private int port;
+//	private Server server;
+//	
+//	public ServerMain(int port) {
+//		this.port = port;
+//		server = new Server(port);
+//	}
 	
 	public static void main(String[] args) {
 		int port;
@@ -22,7 +22,8 @@ public class ServerMain {
 			return;
 		}
 		port = Integer.parseInt(args[0]);
-		new ServerMain(port);
+//		new ServerMain(port);
+		new Server(port);
 		
 		InetAddress address = null;
 		try {
