@@ -13,6 +13,7 @@ import java.util.Scanner;
 public class Server implements Runnable{
 	
 	private List<ServerClient> clients = new ArrayList<ServerClient>();
+	// clientResponse contains ID of client
 	private List<Integer> clientResponse  = new ArrayList<Integer>();
 	private DatagramSocket socket;
 	private int port;
@@ -50,9 +51,10 @@ public class Server implements Runnable{
 			//nextLine() will block till it is executed
 			String text = scanner.nextLine(); //enter will terminate line
 			if (!text.startsWith("/")) {
-				sendToAll("/m/Server: " + text);
-				continue; //does also work without continue
+				System.out.println();
+				continue; // start while loop again and do not continue following code
 			}
+			// text begins with / it is a command
 			text = text.substring(1); //get rid of slash (/)
 			if (text.equals("raw")) {
 				raw = !raw;
@@ -70,9 +72,50 @@ public class Server implements Runnable{
 					System.out.println(c.name + " (" + c.getID() + "): " + c.address.toString() + ":" + c.getPort());
 				}
 				System.out.println("=========");
+			} else if (text.startsWith("m")) {
+				text = text.split("m")[1];
+				sendToAll("/m/Server: " + text);
+			} else if (text.startsWith("kick")) {
+				// /kick Lucas	
+				String name = text.split(" ")[1];
+				boolean num = false;
+				int id = -1;
+				try { //check if name is number (id) or name (username)
+					id = Integer.parseInt(name);
+					num = true;
+				} catch (NumberFormatException e) {
+					num = false;
+				}
+				if (num) { // name is an ID
+					ServerClient kickedClient = null;
+					for (int i = 0; i < clients.size(); i++) {
+						if (clients.get(i).getID() == id) {
+							kickedClient = clients.get(i);
+							break;
+						}
+					}
+					if (kickedClient != null) {
+						send("/m/You get kicked!", kickedClient.address, kickedClient.getPort()); 
+						disconnect(kickedClient.getID(), true);
+					}
+					else System.out.println("Client " + id + " does not exist! Check ID!");
+				} else { // name is a actual name not an id
+					ServerClient kickedClient = null;
+					for (int i = 0; i < clients.size(); i++) {
+						ServerClient c = clients.get(i);
+						if (name.equals(c.name)) {
+							kickedClient = c;
+							break;
+						}
+					}
+					if (kickedClient != null) {
+						send("/m/You get kicked!", kickedClient.address, kickedClient.getPort()); 
+						disconnect(kickedClient.getID(), true);
+					}
+					else System.out.println("Client " + name + " does not exist! Check name!");
+				}
 			}
 		}
-		
 	}
 	
 	private void manageClients() {
@@ -157,6 +200,7 @@ public class Server implements Runnable{
 			//System.out.println(name + "(" + id + ") connected!");			
 			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
 			String ID = "/c/" + id;
+			//send message such that client knows he is connected
 			send(ID, packet.getAddress(), packet.getPort());
 		} else if (string.startsWith("/m/")) {
 			sendToAll(string);
@@ -211,6 +255,8 @@ public class Server implements Runnable{
 	
 	private void disconnect(int id, boolean status) {
 		//status: if they are closing, or if they lost internet connect, or their PC shut down 
+		//true: regular disconnect
+		//false: time out
 		ServerClient c = null;
 		for (int i = 0; i < clients.size(); i++) {
 			if (clients.get(i).getID() == id) {
@@ -219,6 +265,8 @@ public class Server implements Runnable{
 				break;
 			}
 		}
+		//if client got kicked and try to disconnect, he does not exist any more
+		if (c == null) return;
 		String message = "";
 		if (status) {
 			message = "Client " + c.name + " (" + c.getID() + ") @ " + c.address.toString() + ":" + c.port + " disconnected.";
