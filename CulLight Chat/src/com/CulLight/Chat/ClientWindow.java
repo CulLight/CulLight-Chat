@@ -159,6 +159,9 @@ public class ClientWindow extends JFrame implements Runnable{
 					} else if (message.startsWith("/m/")) {
 						String text = message.substring(3).split("/e/")[0];
 						console(text);
+					} else if (message.startsWith("/p/")) {
+						String reply = "/p/" + client.getID() + "/e/";
+						send(reply, false);
 					}
 				}
 			}

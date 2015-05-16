@@ -12,10 +12,13 @@ import java.util.List;
 public class Server implements Runnable{
 	
 	private List<ServerClient> clients = new ArrayList<ServerClient>();
+	private List<Integer> clientResponse  = new ArrayList<Integer>();
 	private DatagramSocket socket;
 	private int port;
 	private boolean running = false;
 	private Thread run, manage, send, receive;
+	
+	private final int MAX_ATTEMPS = 5;
 	
 	//constructor needs no address, because we are the address
 	// dont need a name because we are a server not a client
@@ -47,7 +50,38 @@ public class Server implements Runnable{
 		manage = new Thread("Manage") {
 			public void run() {
 				while (running) {
-					//Managing
+					//Managing: Send ping 
+					sendToAll("/p/server");
+					//the following should not run as fast as possible.
+					//also dont want to use up all memory
+					//Thread.sleep is awful for timing, ok here
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					//one dont want to make following for loop
+					//cos ocassionally one can run in thread concurrucie issues
+					//for (ServerClients c : clients)
+					for (int i = 0; i < clients.size(); i++) {
+						ServerClient c = clients.get(i);
+						if (!clientResponse.contains(c.getID())) {
+							// clients has not yet responded
+							if (c.attempt >=  MAX_ATTEMPS) {
+								disconnect(c.getID(), false);
+							} else {
+								c.attempt++;
+							}
+						} else {
+							// why new Integer
+							//without it will use remove(int index) so it will remove
+							//the client with index c.getID() instead of object in list
+							//that has id == c.getID()
+							clientResponse.remove(new Integer(c.getID()));
+							c.attempt = 0;
+						}
+
+					}
 				}
 			}
 		};
@@ -72,6 +106,33 @@ public class Server implements Runnable{
 			}
 		};
 		receive.start();		
+	}
+	
+	
+	// connection prefix: /c/
+	private void process(DatagramPacket packet) {
+		String string  = new String(packet.getData());
+		if (string.startsWith("/c/")) {
+			//Guaranteed universal unique number
+			//UUID id = UUID.randomUUID();
+			int id = UniqueIdentifier.getIdentifier();	
+			String name = string.split("/c/|/e/")[1];
+			String text = name + "(" + id + ")"  + " @ " +  packet.getAddress().toString() + ":" + packet.getPort() + " connected.";
+			System.out.println(text);
+			//System.out.println(name + "(" + id + ") connected!");			
+			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
+			String ID = "/c/" + id;
+			send(ID, packet.getAddress(), packet.getPort());
+		} else if (string.startsWith("/m/")) {
+			sendToAll(string);
+		}else if (string.startsWith("/d/")) {
+			String id = string.split("/d/|/e/")[1];
+			disconnect(Integer.parseInt(id), true);
+		} else if (string.startsWith("/p/")) {
+			clientResponse.add(Integer.parseInt(string.split("/p/|/e/")[1]));
+		} else {
+			System.out.println(string);
+		}
 	}
 	
 	private void send(String message, InetAddress address, int port) {
@@ -106,29 +167,6 @@ public class Server implements Runnable{
 		}
 	}
 	
-	// connection prefix: /c/
-	private void process(DatagramPacket packet) {
-		String string  = new String(packet.getData());
-		if (string.startsWith("/c/")) {
-			//Guaranteed universal unique number
-			//UUID id = UUID.randomUUID();
-			int id = UniqueIdentifier.getIdentifier();	
-			String name = string.split("/c/|/e/")[1];
-			String text = name + "(" + id + ")"  + " @ " +  packet.getAddress().toString() + ":" + packet.getPort() + " connected.";
-			System.out.println(text);
-			//System.out.println(name + "(" + id + ") connected!");			
-			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
-			String ID = "/c/" + id;
-			send(ID, packet.getAddress(), packet.getPort());
-		} else if (string.startsWith("/m/")) {
-			sendToAll(string);
-		}else if (string.startsWith("/d/")) {
-			String id = string.split("/d/|/e/")[1];
-			disconnect(Integer.parseInt(id), true);
-		} else {
-			System.out.println(string);
-		}
-	}
 	
 	
 	private void disconnect(int id, boolean status) {
