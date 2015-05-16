@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 //code to send and receive data
 public class Server implements Runnable{
@@ -16,6 +17,7 @@ public class Server implements Runnable{
 	private DatagramSocket socket;
 	private int port;
 	private boolean running = false;
+	private boolean raw, rawNoPing = false;
 	private Thread run, manage, send, receive;
 	
 	private final int MAX_ATTEMPS = 5;
@@ -42,6 +44,34 @@ public class Server implements Runnable{
 		System.out.println("Server started on port " +  port);
 		manageClients();
 		receive();
+		//console read in
+		Scanner scanner = new Scanner(System.in);
+		while (running) {
+			//nextLine() will block till it is executed
+			String text = scanner.nextLine(); //enter will terminate line
+			if (!text.startsWith("/")) {
+				sendToAll("/m/Server: " + text);
+				continue; //does also work without continue
+			}
+			text = text.substring(1); //get rid of slash (/)
+			if (text.equals("raw")) {
+				raw = !raw;
+				if (raw) System.out.println("Raw mode activated!");
+				else System.out.println("Raw mode disabled!");
+			} else if (text.equals("rawp")) {
+				rawNoPing = !rawNoPing;
+				if (raw) System.out.println("Raw (no ping) mode activated!");
+				else System.out.println("Raw (no ping) mode disabled!");
+			} else if (text.equals("clients")) {
+				System.out.println("Clients:");
+				System.out.println("=========");
+				for (int i=0; i < clients.size(); i++) {
+					ServerClient c = clients.get(i);
+					System.out.println(c.name + " (" + c.getID() + "): " + c.address.toString() + ":" + c.getPort());
+				}
+				System.out.println("=========");
+			}
+		}
 		
 	}
 	
@@ -97,6 +127,7 @@ public class Server implements Runnable{
 					byte[] data = new byte[1024];
 					DatagramPacket packet = new DatagramPacket(data, data.length);
 					try {
+						//wait here till we receive sth
 						socket.receive(packet);
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -112,6 +143,10 @@ public class Server implements Runnable{
 	// connection prefix: /c/
 	private void process(DatagramPacket packet) {
 		String string  = new String(packet.getData());
+		if (raw) System.out.println(string);
+		if (rawNoPing) {
+			if (!string.startsWith("/p/")) System.out.println(string);
+		}
 		if (string.startsWith("/c/")) {
 			//Guaranteed universal unique number
 			//UUID id = UUID.randomUUID();
@@ -161,6 +196,11 @@ public class Server implements Runnable{
 	}
 	
 	private void sendToAll(String message) {
+		if (message.startsWith("/m/")) {
+			String text = message.substring(3);
+			text = text.split("/e/")[0];
+			System.out.println(text);
+		}
 		for (int i = 0; i < clients.size(); i++) {
 			ServerClient client = clients.get(i);
 			send(message, client.address, client.port);

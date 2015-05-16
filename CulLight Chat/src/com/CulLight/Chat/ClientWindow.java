@@ -175,9 +175,9 @@ public class ClientWindow extends JFrame implements Runnable{
 			message = client.getName() + ": " + message;
 			//prefix /m/ to indicate it is a message
 			message = "/m/" + message + "/e/";
+			txtMessage.setText("");
 		}
 		client.send(message.getBytes());
-		txtMessage.setText("");
 	}
 	
 	public void console(String message) {

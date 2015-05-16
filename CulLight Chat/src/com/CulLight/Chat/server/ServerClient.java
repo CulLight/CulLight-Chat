@@ -28,4 +28,7 @@ public class ServerClient {
 		return ID;
 	}
 
+	public int getPort() {
+		return port;
+	}
 }
