@@ -125,6 +125,7 @@ public class Server implements Runnable{
 				while (running) {
 					//Managing: Send ping 
 					sendToAll("/p/server");
+					sendStatus();
 					//the following should not run as fast as possible.
 					//also dont want to use up all memory
 					//Thread.sleep is awful for timing, ok here
@@ -160,6 +161,19 @@ public class Server implements Runnable{
 		};
 		manage.start();
 	}
+	
+
+	private void sendStatus() {
+		if (clients.size() <= 0) return;
+		String users = "/u/";
+		for (int i = 0; i < clients.size() - 1; i++) {
+			// /u/Yan/n/Lucas/n/holger
+			users += clients.get(i).name + "/n/";
+		}
+		users += clients.get(clients.size() - 1).name + "/e/";
+		sendToAll(users);
+	}
+	
 
 	private void receive() {
 		//need keep track of recipient of packets
