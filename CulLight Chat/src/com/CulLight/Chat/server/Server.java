@@ -114,8 +114,37 @@ public class Server implements Runnable{
 					}
 					else System.out.println("Client " + name + " does not exist! Check name!");
 				}
+			} else if (text.equals("help")) {
+				printHelp();
+			} else if (text.equals("quit")) {
+				quit();
+			} else {
+				System.out.println("Unknown command.");
+				printHelp();
 			}
 		}
+		scanner.close();
+	}
+	
+	private void printHelp() {
+		System.out.println();
+		System.out.println("List of all available commands:");
+		System.out.println("==============================");
+		System.out.println("/raw - enables raw mode.");
+		System.out.println("/rawp - enables raw mode (no ping message).");
+		System.out.println("/clients - show all connected clients.");
+		System.out.println("/kick [username or ID] - kicks a user.");
+		System.out.println("/help - print help.");
+		System.out.println("/quit - shuts down server.");
+		System.out.println();
+	}
+	
+	private void quit() {
+		for (int i = 0; i < clients.size(); i++) {
+			disconnect(clients.get(i).getID(), true);
+		}
+		running = false;
+		socket.close();
 	}
 	
 	private void manageClients() {
@@ -186,6 +215,7 @@ public class Server implements Runnable{
 					try {
 						//wait here till we receive sth
 						socket.receive(packet);
+					} catch (SocketException e){ //catch socket exception when closing
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
