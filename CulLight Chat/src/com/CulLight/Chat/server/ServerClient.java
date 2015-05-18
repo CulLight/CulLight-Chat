@@ -31,4 +31,8 @@ public class ServerClient {
 	public int getPort() {
 		return port;
 	}
+	
+	public InetAddress getAddress() {
+		return address;
+	}
 }

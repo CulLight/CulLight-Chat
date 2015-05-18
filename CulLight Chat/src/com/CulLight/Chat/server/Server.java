@@ -74,7 +74,7 @@ public class Server implements Runnable{
 				System.out.println("=========");
 			} else if (text.startsWith("m")) {
 				text = text.split("m")[1];
-				sendToAll("/m/Server: " + text);
+				sendToAll("/m/Server:" + text);
 			} else if (text.startsWith("kick")) {
 				// /kick Lucas	
 				String name = text.split(" ")[1];
@@ -95,7 +95,7 @@ public class Server implements Runnable{
 						}
 					}
 					if (kickedClient != null) {
-						send("/m/You get kicked!", kickedClient.address, kickedClient.getPort()); 
+						send("/m/You got kicked!", kickedClient.address, kickedClient.getPort()); 
 						disconnect(kickedClient.getID(), true);
 					}
 					else System.out.println("Client " + id + " does not exist! Check ID!");
@@ -109,11 +109,12 @@ public class Server implements Runnable{
 						}
 					}
 					if (kickedClient != null) {
-						send("/m/You get kicked!", kickedClient.address, kickedClient.getPort()); 
+						send("/m/You got kicked!", kickedClient.address, kickedClient.getPort()); 
 						disconnect(kickedClient.getID(), true);
 					}
 					else System.out.println("Client " + name + " does not exist! Check name!");
 				}
+				System.out.println("# Clients: " + clients.size());
 			} else if (text.equals("help")) {
 				printHelp();
 			} else if (text.equals("quit")) {
@@ -133,6 +134,7 @@ public class Server implements Runnable{
 		System.out.println("/raw - enables raw mode.");
 		System.out.println("/rawp - enables raw mode (no ping message).");
 		System.out.println("/clients - show all connected clients.");
+		System.out.println("/m [message] - send message to all clients.");
 		System.out.println("/kick [username or ID] - kicks a user.");
 		System.out.println("/help - print help.");
 		System.out.println("/quit - shuts down server.");
@@ -247,8 +249,23 @@ public class Server implements Runnable{
 			//send message such that client knows he is connected
 			send(ID, packet.getAddress(), packet.getPort());
 		} else if (string.startsWith("/m/")) {
-			sendToAll(string);
-		}else if (string.startsWith("/d/")) {
+			// check if addressee is client or got kicked
+			boolean isClient = false;
+			for (int i = 0; i < clients.size(); i++) {
+				ServerClient c = clients.get(i);
+				if ( packet.getPort() == c.getPort() && packet.getAddress().getHostAddress().equals(c.getAddress().getHostAddress())) {
+					isClient = true;
+					break;
+				}
+			}
+			if (isClient) sendToAll(string);
+			else {
+				send("/m/Stop spaming!/e/", packet.getAddress(), packet.getPort());	
+				String text = string.substring(3);
+				text = text.split("/e/")[0];
+				System.out.println(text);
+			}
+		} else if (string.startsWith("/d/")) {
 			String id = string.split("/d/|/e/")[1];
 			disconnect(Integer.parseInt(id), true);
 		} else if (string.startsWith("/p/")) {
