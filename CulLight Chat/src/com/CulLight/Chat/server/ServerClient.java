@@ -14,12 +14,14 @@ public class ServerClient {
 	//if client times out, we need to contact him "attempt" times 
 	//before be sure he is disconnected and then kick him out.
 	public int attempt = 0;
+	public String color;
 	
-	public ServerClient(String name, InetAddress address, int port, final int ID) {
+	public ServerClient(String name, InetAddress address, int port, final int ID, final String color) {
 		this.name = name;
 		this.address = address;
 		this.port = port;
 		this.ID = ID;	
+		this.color = color;
 	}
 	
 	//class is public, so one has read and write permission, but ID should not be modified.
@@ -34,5 +36,9 @@ public class ServerClient {
 	
 	public InetAddress getAddress() {
 		return address;
+	}
+	
+	public String getColor() {
+		return color;
 	}
 }

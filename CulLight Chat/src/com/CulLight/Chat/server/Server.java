@@ -51,7 +51,7 @@ public class Server implements Runnable{
 			//nextLine() will block till it is executed
 			String text = scanner.nextLine(); //enter will terminate line
 			if (!text.startsWith("/")) {
-				System.out.println();
+				printHelp();
 				continue; // start while loop again and do not continue following code
 			}
 			// text begins with / it is a command
@@ -73,8 +73,9 @@ public class Server implements Runnable{
 				}
 				System.out.println("=========");
 			} else if (text.startsWith("m")) {
-				text = text.split("m")[1];
-				sendToAll("/m/Server:" + text);
+				// get rid of inital m
+				text = text.substring(1);
+				sendToAll("/m/black/Server:" + text);
 			} else if (text.startsWith("kick")) {
 				// /kick Lucas	
 				String name = text.split(" ")[1];
@@ -95,7 +96,7 @@ public class Server implements Runnable{
 						}
 					}
 					if (kickedClient != null) {
-						send("/m/You got kicked!", kickedClient.address, kickedClient.getPort()); 
+						send("/m/black/You got kicked!", kickedClient.address, kickedClient.getPort()); 
 						disconnect(kickedClient.getID(), true);
 					}
 					else System.out.println("Client " + id + " does not exist! Check ID!");
@@ -109,7 +110,7 @@ public class Server implements Runnable{
 						}
 					}
 					if (kickedClient != null) {
-						send("/m/You got kicked!", kickedClient.address, kickedClient.getPort()); 
+						send("/m/black/You got kicked!", kickedClient.address, kickedClient.getPort()); 
 						disconnect(kickedClient.getID(), true);
 					}
 					else System.out.println("Client " + name + " does not exist! Check name!");
@@ -240,27 +241,34 @@ public class Server implements Runnable{
 			//Guaranteed universal unique number
 			//UUID id = UUID.randomUUID();
 			int id = UniqueIdentifier.getIdentifier();	
+			String color = UniqueColor.getUniqueColor();
 			String name = string.split("/c/|/e/")[1];
 			String text = name + "(" + id + ")"  + " @ " +  packet.getAddress().toString() + ":" + packet.getPort() + " connected.";
 			System.out.println(text);
 			//System.out.println(name + "(" + id + ") connected!");			
-			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
+			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id, color));
 			String ID = "/c/" + id;
 			//send message such that client knows he is connected
 			send(ID, packet.getAddress(), packet.getPort());
 		} else if (string.startsWith("/m/")) {
 			// check if addressee is client or got kicked
 			boolean isClient = false;
+			//get color code of client that send message
+			String color = "";
 			for (int i = 0; i < clients.size(); i++) {
 				ServerClient c = clients.get(i);
 				if ( packet.getPort() == c.getPort() && packet.getAddress().getHostAddress().equals(c.getAddress().getHostAddress())) {
 					isClient = true;
+					color = c.getColor();
 					break;
 				}
 			}
-			if (isClient) sendToAll(string);
+			if (isClient) {
+		    	String message = string.substring(0, 3) + color +  "/" + string.substring(3,string.length());
+				sendToAll(message);
+			}
 			else {
-				send("/m/Stop spaming!/e/", packet.getAddress(), packet.getPort());	
+				send("/m/black/Stop spaming!/e/", packet.getAddress(), packet.getPort());	
 				String text = string.substring(3);
 				text = text.split("/e/")[0];
 				System.out.println(text);
@@ -302,8 +310,8 @@ public class Server implements Runnable{
 	
 	private void sendToAll(String message) {
 		if (message.startsWith("/m/")) {
-			String text = message.substring(3);
-			text = text.split("/e/")[0];
+			String colorText = message.substring(3).split("/e/")[0];
+	    	String text = colorText.split("/")[1];
 			System.out.println(text);
 		}
 		for (int i = 0; i < clients.size(); i++) {

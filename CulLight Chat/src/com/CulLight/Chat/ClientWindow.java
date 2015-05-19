@@ -1,5 +1,6 @@
 package com.CulLight.Chat;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -18,18 +19,24 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 public class ClientWindow extends JFrame implements Runnable{
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
 	private JTextField txtMessage;
-	private JTextArea history;
+	public JTextPane history;
+	StyledDocument doc;
+	Style style;
 	private DefaultCaret caret;
 	
 	private Thread run, listen;
@@ -41,6 +48,8 @@ public class ClientWindow extends JFrame implements Runnable{
 	private JMenuItem mntmOnlineUsers;
 	private JMenuItem mntmExit;
 	
+	boolean bColor = false;
+	
 	private OnlineUsers users;
 	
 	public ClientWindow(String name, String address, int port) {
@@ -48,12 +57,12 @@ public class ClientWindow extends JFrame implements Runnable{
 		Boolean connect = client.openConnection(address);
 		if (!connect) {
 			System.err.println("Connection failed");
-			console("Connection failed");
+			console("Connection failed", Color.BLACK);
 		}
 		//unconventional to call function from constructor, but 
 		// createWindow is private, so one cant overwrite it.
 		createWindow();
-		console("Attempting a connection to " + address + ":" + port + ", user:" + name);
+		console("Attempting a connection to " + address + ":" + port + ", user:" + name, Color.BLACK);
 		String connection = "/c/" + name + "/e/";
 		client.send(connection.getBytes());
 		users = new OnlineUsers();
@@ -105,14 +114,13 @@ public class ClientWindow extends JFrame implements Runnable{
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		//sum of widths of each grid has to be equal to JPanel size
 		gbl_contentPane.columnWidths = new int[]{28, 815, 30, 7}; //Sum 880
-		gbl_contentPane.rowHeights = new int[]{25, 470, 40, 15}; //Sum 550
-		gbl_contentPane.columnWeights = new double[]{1.0, 1.0};
-		gbl_contentPane.rowWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_contentPane.rowHeights = new int[]{25, 485, 40}; //Sum 550
 		//set layout of the frame to the set layout above
 		contentPane.setLayout(gbl_contentPane);
 		
-		history = new JTextArea();
-		history.setEditable(false);
+		history = new JTextPane();
+        doc = history.getStyledDocument();
+        style = history.addStyle("Chat Styole", null);
 		// Put JTextArea history into ScrollPane
 		JScrollPane scroll = new JScrollPane(history);
 		//Scroll bar should also go to last entered line
@@ -121,16 +129,13 @@ public class ClientWindow extends JFrame implements Runnable{
 		GridBagConstraints scrollConstraints = new GridBagConstraints();
 		scrollConstraints.insets = new Insets(0, 0, 5, 5);
 		scrollConstraints.fill = GridBagConstraints.BOTH;
-		// which grid it is in
 		scrollConstraints.gridx = 0;
 		scrollConstraints.gridy = 0;
-		// grid cells it takes up
 		scrollConstraints.gridwidth = 3;
 		scrollConstraints.gridheight = 2;
-		// how to resize, 0 = no resizing, 1 = proportional to resizing
 		scrollConstraints.weightx = 1;
 		scrollConstraints.weighty = 1;
-		scrollConstraints.insets = new Insets(20, 0, 0, 0);
+		scrollConstraints.insets = new Insets(0, 5, 0, 0);
 		contentPane.add(scroll, scrollConstraints);
 		
 		txtMessage = new JTextField();
@@ -147,7 +152,6 @@ public class ClientWindow extends JFrame implements Runnable{
 		gbc_txtMessage.gridx = 0;
 		gbc_txtMessage.gridy = 2;
 		gbc_txtMessage.gridwidth = 2;
-		// resize only in x not in y
 		gbc_txtMessage.weightx = 1;
 		gbc_txtMessage.weighty = 0;
 		contentPane.add(txtMessage, gbc_txtMessage);
@@ -155,7 +159,7 @@ public class ClientWindow extends JFrame implements Runnable{
 		
 		JButton btnSend = new JButton("Send");
 		btnSend.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
 				send(txtMessage.getText(), true);
 			}
 		});
@@ -199,13 +203,21 @@ public class ClientWindow extends JFrame implements Runnable{
 						//client.setID(Integer.parseInt(message.substring(3, message.length()-1)));
 						String id = message.split("/c/|/e/")[1];
 						client.setID(Integer.parseInt(id));
-						console("Successfully connected to server! ID: " + client.getID());
+						console("Successfully connected to server! ID: " + client.getID(), Color.BLACK);
 					} else if (message.startsWith("/m/")) {
-						String text = message.substring(3).split("/e/")[0];
-						console(text);
+						// message = /m/blue/ Huhu ich bins/e/
+						// info = blue/ Huhu ich bins
+				    	String info = message.substring(3).split("/e/")[0];
+				    	// colorStr = blue
+				    	String colorStr = info.split("/")[0];
+				    	Color color = getColor(colorStr);
+				    	String text = info.split("/")[1];
+						console(text, color);
+						//ping to check if client is still there
 					} else if (message.startsWith("/p/")) {
 						String reply = "/p/" + client.getID() + "/e/";
 						send(reply, false);
+						// users list of all users
 					} else if (message.startsWith("/u/")) {
 						String[] u = message.split("/u/|/n/|/e/");
 						// message = /u/Yan/n/Lucas/n/holger/e/
@@ -217,6 +229,8 @@ public class ClientWindow extends JFrame implements Runnable{
 					}
 				}
 			}
+
+
 		};
 		listen.start();
 	}	
@@ -232,9 +246,31 @@ public class ClientWindow extends JFrame implements Runnable{
 		client.send(message.getBytes());
 	}
 	
-	public void console(String message) {
-		history.append(message + "\n\r");
+	public void console(String message, Color color) {
+
+		StyleConstants.setForeground(style, color);
+	    try {
+			doc.insertString(doc.getLength(), message + "\n\r", style);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
 		history.setCaretPosition(history.getDocument().getLength());
+	}
+	
+	private Color getColor(String colorStr) {
+		Color color = null;
+		if (colorStr.equals("blue")) color = Color.BLUE;
+		else if (colorStr.equals("black")) color = Color.BLACK;
+		else if (colorStr.equals("cyan")) color = Color.CYAN;
+		else if (colorStr.equals("gray")) color = Color.GRAY;
+		else if (colorStr.equals("green")) color = Color.GREEN;
+		else if (colorStr.equals("magenta")) color = Color.MAGENTA;
+		else if (colorStr.equals("orange")) color = Color.ORANGE;
+		else if (colorStr.equals("red")) color = Color.RED;
+		else if (colorStr.equals("pink")) color = Color.PINK;
+		else if (colorStr.equals("yellow")) color = Color.YELLOW;
+
+		return color;
 	}
 
 }
